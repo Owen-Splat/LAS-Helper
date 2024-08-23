@@ -16,10 +16,11 @@ class Debug(socket.socket):
         data = str(data, 'utf-8')
         return bytes.fromhex(data)
 
-    def writeMemory(self, addr: int, value):
-        # if isinstance(value, int):
-        #     signed = True if value < 0 else False
-        #     b_value: bytes = value.to_bytes(size, 'little', signed=signed)
-        #     value = b_value.hex()
+    def writeMemory(self, addr: int, size: int, value):
+        if isinstance(value, int):
+            print(value)
+            signed = True if value < 0 else False
+            b_value: bytes = value.to_bytes(size, 'little', signed=signed)
+            value = "0x" + b_value.hex()
 
         self.sendCommand(f"pokeMain {hex(addr)} {value}")

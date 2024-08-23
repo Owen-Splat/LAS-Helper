@@ -12,8 +12,7 @@ class Addresses:
     FrameworkPtr = 0x7101C97188
     ActorByIdMapPtr = 0x7101CB2D00
     GlobalSave = 0x7101CBB200
-    Inventory = 0x7101CC1368
-    RamEnd = 0x710143109f
+    # RamEnd = 0x710143109f
 
 
 def getFramework() -> Framework:
@@ -492,10 +491,40 @@ class EventFlags(Structure):
 class GlobalSave(Structure):
     @property
     def eventFlags(self) -> EventFlags:
-        return EventFlags(self.addr + 0x5F20)
+        return EventFlags(self.addr + 0x5F20) # 0x7101CC1120
+    
+    @property
+    def inventory(self) -> Inventory:
+        return Inventory(self.addr + 0x6168) # 0x7101CC1368
 
 
 class Inventory(Structure):
+    TRADE_ITEMS = {
+        0: "None",
+        1: "YoshiDoll",
+        2: "Ribbon",
+        3: "DogFood",
+        4: "Bananas",
+        5: "Stick",
+        6: "Honeycomb",
+        7: "Pineapple",
+        8: "Hibiscus",
+        9: "Letter",
+        10: "Broom",
+        11: "FishingHook",
+        12: "Necklace",
+        13: "MermaidsScale",
+        14: "MagnifyingLens"
+    }
+
+    COMPANIONS = {
+        0: "None",
+        1: "BowWow",
+        2: "Marin",
+        3: "Ghost",
+        4: "Rooster"
+    }
+
     @property
     def acornCounter(self) -> int:
         return ctx.read_u8(self.addr + 0xA5)
@@ -512,5 +541,33 @@ class Inventory(Structure):
     def rupees(self) -> int:
         return ctx.read_u16(self.addr + 0x80)
 
-    def fullHeal(self):
-        ctx.write(self.addr + 0x84, 12 + (4 * ctx.count_set_bits(ctx.read_u16(self.addr + 0x98))))
+    @property
+    def tradeItem(self) -> str:
+        return Inventory.TRADE_ITEMS[ctx.read_u8(self.addr + 0x9A)]
+
+    @property
+    def companion(self) -> str:
+        return Inventory.COMPANIONS[ctx.read_u8(self.addr + 0x9D)]
+
+    def fullHeal(self) -> None:
+        hearts = 3
+        hearts += ctx.count_set_bits(ctx.read_u16(self.addr + 0x98))
+        hearts += ctx.count_set_bits(ctx.read_u64(self.addr + 0x90)) // 4
+        ctx.write(self.addr + 0x84, size=1, data=(4 * hearts))
+
+    def forceAcorn(self) -> None:
+        ctx.write(self.addr + 0xA5, size=1, data=14)
+
+    def forcePop(self) -> None:
+        ctx.write(self.addr + 0xA4, size=1, data=52)
+
+    def maxRupees(self) -> None:
+        ctx.write(self.addr + 0x80, size=2, data=9999)
+
+    def testTrade(self) -> None:
+        ctx.write(self.addr + 0x9A, size=1, data=13)
+
+    def resourceRefill(self) -> None:
+        ctx.write(self.addr + 0x9E, size=1, data=60) # Bombs
+        ctx.write(self.addr + 0x9F, size=1, data=60) # Arrows
+        ctx.write(self.addr + 0xA0, size=1, data=40) # MagicPowder

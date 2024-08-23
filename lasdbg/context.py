@@ -32,8 +32,8 @@ class Context:
     def read(self, addr: int, size: int) -> bytes:
         return self.debug.readMemory(addr, size)
 
-    def write(self, addr: int, data=None):
-        self.debug.writeMemory(addr, data)
+    def write(self, addr: int, size: int, data=None):
+        self.debug.writeMemory(addr, size, data)
 
     # def break_process(self) -> None:
     #     self.debug.breakProcess()
@@ -59,19 +59,19 @@ class Context:
         return struct.unpack("B", self.read(addr, 1))[0]
 
     def read_u16(self, addr: int) -> int:
-        return struct.unpack("H", self.read(addr, 2))[0]
+        return struct.unpack("<H", self.read(addr, 2))[0]
 
     def read_u32(self, addr: int) -> int:
-        return struct.unpack("I", self.read(addr, 4))[0]
+        return struct.unpack("<I", self.read(addr, 4))[0]
 
     def read_s32(self, addr: int) -> int:
-        return struct.unpack("i", self.read(addr, 4))[0]
+        return struct.unpack("<i", self.read(addr, 4))[0]
 
     def read_u64(self, addr: int) -> int:
-        return struct.unpack("Q", self.read(addr, 8))[0]
+        return struct.unpack("<Q", self.read(addr, 8))[0]
 
     def read_f32(self, addr: int) -> float:
-        return struct.unpack("f", self.read(addr, 4))[0]
+        return struct.unpack("<f", self.read(addr, 4))[0]
 
     # def read_string(self, addr: int) -> str:
     #     b = self.read(addr, 0x40)

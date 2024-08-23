@@ -30,7 +30,6 @@ class PlotEntry(tp.NamedTuple):
 @dataclasses.dataclass
 class EntryContext:
     save: game.GlobalSave = game.GlobalSave(ctx.addr(game.Addresses.GlobalSave))
-    inventory: game.Inventory = game.Inventory(ctx.addr(game.Addresses.Inventory))
 
     frm: game.Framework = game.getFramework()
     player: tp.Optional[game.Player] = None
@@ -65,10 +64,12 @@ class EntryContext:
 def getEntries() -> tp.List[Entry]:
     entries = []
 
-    entries.append(Entry("Health", lambda ectx: str(ectx.inventory.health)))
-    entries.append(Entry("Rupees", lambda ectx: str(ectx.inventory.rupees)))
-    entries.append(Entry("Pop Counter", lambda ectx: str(ectx.inventory.popCounter)))
-    entries.append(Entry("Acorn Counter", lambda ectx: str(ectx.inventory.acornCounter)))
+    entries.append(Entry("Health", lambda ectx: str(ectx.save.inventory.health)))
+    entries.append(Entry("Rupees", lambda ectx: str(ectx.save.inventory.rupees)))
+    entries.append(Entry("Pop Counter", lambda ectx: str(ectx.save.inventory.popCounter)))
+    entries.append(Entry("Acorn Counter", lambda ectx: str(ectx.save.inventory.acornCounter)))
+    entries.append(Entry("Trade Item", lambda ectx: str(ectx.save.inventory.tradeItem)))
+    entries.append(Entry("Companion", lambda ectx: str(ectx.save.inventory.companion)))
 
     # entries.append(Entry("Frame", lambda ectx: str(str(ectx.frm.frameCount))))
     # entries.append(Entry("Number of actors", lambda ectx: str(len(ectx.actsys.actors))))
@@ -259,13 +260,13 @@ class MainWindow(qtw.QMainWindow):
     #         ly.clear()
     #     self.graph.clear()
 
-    @qt.Slot()
-    def onFindHinoxPressed(self) -> None:
-        self.entryCtx.shouldFindHinox = True
+    # @qt.Slot()
+    # def onFindHinoxPressed(self) -> None:
+    #     self.entryCtx.shouldFindHinox = True
 
     @qt.Slot()
     def onHealPressed(self) -> None:
-        inventory = self.entryCtx.inventory
+        inventory = self.entryCtx.save.inventory
         inventory.fullHeal()
         # player = self.entryCtx.player
         # if not player:
@@ -280,13 +281,15 @@ class MainWindow(qtw.QMainWindow):
         # # ctx.write(rootComp.coordsNew.pos.addr + 8, struct.pack('<f', 500))
 
     @qt.Slot()
-    def onWarpHPressed(self) -> None:
-        player = self.entryCtx.player
-        if not player:
-            return
-        rootComp = player.rootComp.value
-        if not rootComp:
-            return
+    def onForcePopPressed(self) -> None:
+        inventory = self.entryCtx.save.inventory
+        inventory.forcePop()
+        # player = self.entryCtx.player
+        # if not player:
+        #     return
+        # rootComp = player.rootComp.value
+        # if not rootComp:
+        #     return
         # ctx.write(rootComp.coordsNew.pos.addr, struct.pack('<f', 38))
         # ctx.write(rootComp.coordsNew.pos.addr + 4, struct.pack('<f', 0))
         # ctx.write(rootComp.coordsNew.pos.addr + 8, struct.pack('<f', 72))
@@ -299,22 +302,30 @@ class MainWindow(qtw.QMainWindow):
         # ctx.write(rootComp.coordsNew.pos.addr + 4, struct.pack('<f', 5))
         # ctx.write(rootComp.coordsNew.pos.addr + 8, struct.pack('<f', 20))
 
+    @qt.Slot()
+    def onRefillPressed(self) -> None:
+        inventory = self.entryCtx.save.inventory
+        inventory.resourceRefill()
+
     def initLayout(self) -> None:
         buttonsLayout = qtw.QHBoxLayout()
-        self.runBtn = qtw.QPushButton("Continue")
+        self.runBtn = qtw.QPushButton("Monitor Stats")
         self.runBtn.pressed.connect(self.onRunBtnPressed)
         buttonsLayout.addWidget(self.runBtn)
         # clearGraphBtn = qtw.QPushButton("Clear graph")
         # clearGraphBtn.pressed.connect(self.onClearGraphPressed)
         # buttonsLayout.addWidget(clearGraphBtn)
-        findHinoxBtn = qtw.QPushButton("Find Hinox")
-        findHinoxBtn.pressed.connect(self.onFindHinoxPressed)
-        buttonsLayout.addWidget(findHinoxBtn)
+        # findHinoxBtn = qtw.QPushButton("Find Hinox")
+        # findHinoxBtn.pressed.connect(self.onFindHinoxPressed)
+        # buttonsLayout.addWidget(findHinoxBtn)
         testBtn = qtw.QPushButton("Full Heal")
         testBtn.pressed.connect(self.onHealPressed)
         buttonsLayout.addWidget(testBtn)
-        testBtn = qtw.QPushButton("WarpH")
-        testBtn.pressed.connect(self.onWarpHPressed)
+        testBtn = qtw.QPushButton("Force PoP")
+        testBtn.pressed.connect(self.onForcePopPressed)
+        buttonsLayout.addWidget(testBtn)
+        testBtn = qtw.QPushButton("Refill Bombs/Arrows/Powder")
+        testBtn.pressed.connect(self.onRefillPressed)
         buttonsLayout.addWidget(testBtn)
 
         left = qtw.QVBoxLayout()
