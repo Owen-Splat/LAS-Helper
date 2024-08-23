@@ -83,7 +83,7 @@ class Context:
         i = 0
         while True:
             c = self.read_u8(addr + i)
-            if c == 0:
+            if c == 0 or i > 64:
                 break
             s += chr(c)
             i += 1

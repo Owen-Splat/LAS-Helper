@@ -11,7 +11,7 @@ class Debug(socket.socket):
         self.s.sendall(content.encode())
 
     def readMemory(self, addr: int, size: int):
-        self.sendCommand(f"peekMain {hex(addr)} {hex(size)}")
+        self.sendCommand(f"peekMain {hex(addr)} {size}")
         data = self.s.recv((size * 2) + 1)[:-1] # remove trailing \n
         data = str(data, 'utf-8')
         return bytes.fromhex(data)

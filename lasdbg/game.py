@@ -16,7 +16,7 @@ class Addresses:
 
 
 def getFramework() -> Framework:
-    return Framework(ctx.read_u64(ctx.addr(Addresses.FrameworkPtr)))
+    return Framework(ctx.addr(Addresses.FrameworkPtr))
 
 
 class Structure:
@@ -481,11 +481,11 @@ class Save248(Structure):
 class EventFlags(Structure):
     @property
     def x240(self) -> Save240:
-        return Save240(ctx.read_u64(self.addr + 0x240))
+        return Save240(self.addr + 0x240)
 
     @property
     def x248(self) -> Save248:
-        return Save248(ctx.read_u64(self.addr + 0x248))
+        return Save248(self.addr + 0x248)
 
 
 class GlobalSave(Structure):

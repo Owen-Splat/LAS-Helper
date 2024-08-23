@@ -64,6 +64,7 @@ class EntryContext:
 def getEntries() -> tp.List[Entry]:
     entries = []
 
+    entries.append(Entry("Current Level", lambda ectx: str(ectx.save.eventFlags.x248.levelName)))
     entries.append(Entry("Health", lambda ectx: str(ectx.save.inventory.health)))
     entries.append(Entry("Rupees", lambda ectx: str(ectx.save.inventory.rupees)))
     entries.append(Entry("Pop Counter", lambda ectx: str(ectx.save.inventory.popCounter)))
@@ -75,8 +76,8 @@ def getEntries() -> tp.List[Entry]:
     # entries.append(Entry("Number of actors", lambda ectx: str(len(ectx.actsys.actors))))
     # entries.append(Entry("Number of map objects", lambda ectx: str(len(ectx.actsys.mapObjects))))
 
-    # entries.append(Entry("Player - Actor spawn pos",
-    #                      lambda ectx: str(ectx.player.spawnCoords.pos)))
+    entries.append(Entry("Player - Actor spawn pos",
+                         lambda ectx: str(ectx.player.spawnCoords.pos)))
 
     # # entries.append(Entry("Player - Actor spawn rotate",
     # #                      lambda ectx: str(ectx.player.spawnCoords.rotate)))
@@ -307,6 +308,12 @@ class MainWindow(qtw.QMainWindow):
         inventory = self.entryCtx.save.inventory
         inventory.resourceRefill()
 
+    @qt.Slot()
+    def onTestPressed(self) -> None:
+        save = self.entryCtx.save
+        print(save.eventFlags.x248.levelName)
+        print(save.eventFlags.x248.setup)
+
     def initLayout(self) -> None:
         buttonsLayout = qtw.QHBoxLayout()
         self.runBtn = qtw.QPushButton("Monitor Stats")
@@ -326,6 +333,9 @@ class MainWindow(qtw.QMainWindow):
         buttonsLayout.addWidget(testBtn)
         testBtn = qtw.QPushButton("Refill Bombs/Arrows/Powder")
         testBtn.pressed.connect(self.onRefillPressed)
+        buttonsLayout.addWidget(testBtn)
+        testBtn = qtw.QPushButton("Test")
+        testBtn.pressed.connect(self.onTestPressed)
         buttonsLayout.addWidget(testBtn)
 
         left = qtw.QVBoxLayout()
